@@ -15,6 +15,8 @@ The app follows `LeakDetectionV3.ipynb` (latest supplied reference): a binary LS
 ```sh
 python ../run.py
 ```
+Or run:
+python dashboard/run.py
 
 From `dashboard`, run `python run.py` instead. The launcher locates the project using its own file path, uses the dashboard's Python environment, and starts both the frontend and backend. It finds Node in your shell or the installed Codex runtime, so a missing `pnpm` command in your terminal does not prevent startup. Keep the terminal open; Ctrl+C stops only services started by that launcher. If the dashboard services are already running, it prints their addresses and reuses them.
 
