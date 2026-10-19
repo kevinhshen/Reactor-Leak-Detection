@@ -245,18 +245,24 @@ def convert_folder(
 
 
 if __name__ == "__main__":
+    import argparse
     import sys
 
-    # Edit this default if you just press Run in your editor:
-    target = sys.argv[1] if len(sys.argv) > 1 else "test.mdb"
-    second = sys.argv[2] if len(sys.argv) > 2 else None
+    parser = argparse.ArgumentParser(description="Convert Access databases to CSV files.")
+    parser.add_argument("target", help="An .mdb/.accdb file or a folder to scan recursively")
+    parser.add_argument("output_dir", nargs="?", help="Output folder (defaults to a sibling *_csv folder)")
+    parser.add_argument("table", nargs="?", help="Optional table name, for a single database only")
+    args = parser.parse_args()
+    target, second = args.target, args.output_dir
+    if args.table and Path(target).expanduser().is_dir():
+        parser.error("table selection is only supported for a single database")
 
     try:
         if Path(target).expanduser().is_dir():
             convert_folder(target, second)
         else:
             print(f"Converting {target} ...")
-            files = mdb_to_csv(target, second, sys.argv[3] if len(sys.argv) > 3 else None)
+            files = mdb_to_csv(target, second, args.table)
             for tbl, path in files.items():
                 print(f"  {tbl} -> {path}")
             print(f"Done! Converted {len(files)} table(s).")

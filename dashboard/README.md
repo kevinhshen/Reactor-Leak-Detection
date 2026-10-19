@@ -10,17 +10,16 @@ The app follows `LeakDetectionV3.ipynb` (latest supplied reference): a binary LS
 
 ## Quick start
 
-**On this laptop, dependencies and the supplied LSTM baseline with the v2 locator are already installed.** From `dashboard/frontend`, run:
+Install **Python 3.12** and **Node.js 22 or newer**. From the repository root:
 
 ```sh
-python ../run.py
+python3.12 dashboard/run.py --install
+python3.12 dashboard/run.py
 ```
-Or run:
-python dashboard/run.py
 
-From `dashboard`, run `python run.py` instead. The launcher locates the project using its own file path, uses the dashboard's Python environment, and starts both the frontend and backend. It finds Node in your shell or the installed Codex runtime, so a missing `pnpm` command in your terminal does not prevent startup. Keep the terminal open; Ctrl+C stops only services started by that launcher. If the dashboard services are already running, it prints their addresses and reuses them.
+Open **http://127.0.0.1:5173** and start with **Demo → Play**. Initial dependency installation requires internet access. The launcher uses an installed pnpm, a supported local runtime, or npx to run the pinned pnpm version. It starts FastAPI and Vite and uses paths relative to `run.py`, so it also works from another working directory. Ctrl+C stops services started by this launcher.
 
-To check the installed paths without starting services, use `python ../run.py --check` from `frontend`. To install dependencies on a fresh checkout, use `python run.py --install` from `dashboard`; this uses an installed pnpm, the bundled Codex pnpm, or npx to run pnpm 11 without installing it globally.
+A fresh checkout contains no trained weights, imported model registry, recordings, or Python environment. The synthetic demo works without model import once application dependencies are installed. To check an installation without starting services, run `python3.12 dashboard/run.py --check`.
 
 ### Manual setup and separate terminals
 
@@ -56,7 +55,7 @@ pnpm dev
 
 Open **http://127.0.0.1:5173**. Start with the **Demo** button and press **Play**. At 20× speed, the 15-minute illustrative recording plays in 45 seconds. The server and files stay on this computer. Once dependencies are installed, the app needs no external fonts, 3D assets, or network services.
 
-The sibling machine-learning folders remain separate. All dashboard source, local data and model storage live inside `dashboard/`.
+Historical notebooks live in `../notebooks/`, and the optional database converter lives in `../tools/`. All runnable dashboard source, local data and model storage live inside `dashboard/`. See the [model contract](../docs/model-contract.md) for supported exports and the separate binary-detector workflow.
 
 ## Pages and presentation flow
 
@@ -216,7 +215,7 @@ pnpm build
 Tests cover causal prefix consistency, actual window timestamps, consecutive/latched alarms, invalid schemas, restricted pickle handling, incomplete packages, model import/selection/export/reload, split isolation, real small-model fine-tuning, and baseline preservation.
 
 - **Cannot reach model service:** start FastAPI on port 8000; Vite forwards `/api` there. Use port 5173 for the frontend.
-- **`pnpm: command not found`:** use `python ../run.py` from `dashboard/frontend` on this laptop. The launcher finds the installed runtime without modifying your shell settings. Use `--install` if frontend dependencies are missing. Manual pnpm commands require Node/pnpm to be installed and on your terminal's PATH.
+- **`pnpm: command not found`:** use `python ../run.py` from `dashboard/frontend`. The launcher uses an installed pnpm, supported local runtime, or npx without modifying your shell settings. Use `--install` if frontend dependencies are missing. Manual pnpm commands require Node/pnpm to be installed and on your terminal's PATH.
 - **`No module named 'backend'`:** the manual backend command must run from `dashboard`, the folder containing `backend/`. From `frontend`, first run `cd ..`, or use the launcher, which sets the directory automatically.
 - **Missing/incompatible files:** export all four files together from the same notebook run. A scaler or configuration from another run can change model behavior even when dimensions happen to match.
 - **Unsupported pickle objects:** re-export the standard notebook dictionary and StandardScaler using uncompressed `joblib.dump`. Do not change the loader to unrestricted pickle.
@@ -226,14 +225,14 @@ Tests cover causal prefix consistency, actual window timestamps, consecutive/lat
 - **A new model did not change an open chart:** existing replay results are pinned to their model version. Import the recording again with the new version.
 - **Training data rejected:** check reviewed labels, separate groups, both leak/non-leak classes in every split, a mix of old/new training data, and truly independent evaluation runs.
 
-For the upcoming team handoff, provide the four matching exports, one operational sensor CSV, confirmed sampling interval/units, class order, and—when evaluating delay—verified onset and group metadata. These files connect through the UI without a frontend rebuild.
+For a model handoff, provide the four matching exports, one operational sensor CSV, confirmed sampling interval/units, class order, and—when evaluating delay—verified onset and group metadata. These files connect through the UI without a frontend rebuild.
 
 ### Supplied v2 baseline contract
 
-The user confirmed the locator order `LOCA, LOCAC, SGATR, SGBTR, SLBIC, FLB, LLB`, 81 ordered features, a 10-second sensor interval, 12-reading clips, stride 5, and detector alarm at ≥0.7 for three consecutive clips. The locator uses the recording's first three clips after detection; it does not use the first three clips *after* the alarm. A 12-reading clip contains 120 seconds worth of samples but spans 110 seconds between the first and last timestamps, so the first assessment for a CSV starting at TIME=0 ends at TIME=110. Subsequent assessments are 50 seconds apart.
+The documented V3 reference uses the locator order `LOCA, LOCAC, SGATR, SGBTR, SLBIC, FLB, LLB`, 81 ordered features, a 10-second sensor interval, 12-reading clips, stride 5, and detector alarm at ≥0.7 for three consecutive clips. The locator uses the recording's first three clips after detection; it does not use the first three clips *after* the alarm. A 12-reading clip contains 120 seconds worth of samples but spans 110 seconds between the first and last timestamps, so the first assessment for a CSV starting at TIME=0 ends at TIME=110. Subsequent assessments are 50 seconds apart.
 
 This policy may localize poorly if the recording begins with a long pre-leak period: the voting clips may precede onset. It follows the supplied workflow; evaluate it against verified onset data before making localization-performance claims. Future exported weights should include the matching config/scaler and `model_info.json` or an equivalent confirmed metadata manifest. A filename does not prove which training run produced the weights.
 
 ### V3 source and compatibility review
 
-The supplied notebook is preserved unchanged at `docs/reference/LeakDetectionV3.ipynb`. See `docs/v3-compatibility.md` for the verified contract, differences in evaluation, and notebook execution issues. The user confirmed that the four installed model files are current for V3. They remain the selected baseline; no retraining or replacement upload is needed for this update. For future training runs, export and import matching weights, scaler and config together. The dashboard’s synthetic demonstration remains separate from actual model inference.
+The supplied notebook is preserved unchanged at `docs/reference/LeakDetectionV3.ipynb`. See `docs/v3-compatibility.md` for the verified contract, differences in evaluation, and notebook execution issues. The corresponding weights are not tracked in Git. Import matching exports on a fresh checkout; an existing local installation retains its own selected version. For future training runs, export and import matching weights, scaler and config together. The dashboard’s synthetic demonstration remains separate from actual model inference.

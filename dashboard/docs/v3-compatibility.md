@@ -6,13 +6,13 @@ Reference: `reference/LeakDetectionV3.ipynb`, supplied on 2026-10-04. Notebook S
 
 - Binary detector: Sequential LSTM 64 → dropout → LSTM 32 → Dense 32 → dropout → one sigmoid output.
 - Locator: same hidden structure, seven softmax outputs in `LOCA, LOCAC, SGATR, SGBTR, SLBIC, FLB, LLB` order. No `No leak` output.
-- Features: sorted numeric intersection across operational CSVs, excluding TIME and the listed direct-leak/derived gauges. Use the exported config's exact ordered list, rather than hard-coding a new list. The installed package has 81 features; V3 derives its count from data.
+- Features: sorted numeric intersection across operational CSVs, excluding TIME and the listed direct-leak/derived gauges. Use the exported config's exact ordered list, rather than hard-coding a new list. The documented baseline has 81 features; V3 derives its count from data, so the imported package is authoritative.
 - Float32 sensor values, saved StandardScaler, 12 samples/clip, stride 5, 10-second sampling.
 - Detector alarm: score ≥0.7 for three consecutive clips. The 0.5 cutoff used by V3's clip classification report is a separate metric, not its alarm policy.
 - Locator training and validation: first six clips of each leak recording (`clip_no < N_EARLY`, N_EARLY=6), not six clips after a verified onset.
 - Location vote: per-clip argmax over the first three recording clips, then `Series.mode()[0]`. A three-way tie is resolved by alphabetical string ordering, rather than output-index order or mean score.
 
-The user confirmed that the four already installed model files are the current exports for this V3 notebook. The dashboard keeps those weights and aligns these preprocessing and voting rules. It invokes the seven-class locator only after an alarm and reveals the vote when the alarm and all three clips are available. The notebook evaluates the locator separately on known leak recordings; it does not implement a combined deployed inference service. Alarm gating comes from the user's confirmed integration requirement.
+Trained weights are not included in the repository. After matching exports are imported, the dashboard applies these preprocessing and voting rules. It invokes the seven-class locator only after an alarm and reveals the vote when the alarm and all three clips are available. The notebook evaluates the locator separately on known leak recordings; it does not implement a combined deployed inference service. Alarm gating is a dashboard integration policy.
 
 ## Deliberate dashboard evaluation safeguards
 

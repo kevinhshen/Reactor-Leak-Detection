@@ -100,7 +100,7 @@ def existing_service(kind, port):
 def check_dependencies(node, version):
     if not PYTHON.is_file():
         raise RuntimeError("Dashboard Python environment is missing. Run: python run.py --install")
-    subprocess.run([str(PYTHON), "-c", "import uvicorn, fastapi"], cwd=ROOT, check=True)
+    subprocess.run([str(PYTHON), "-c", "import uvicorn, fastapi, multipart, numpy, pandas, sklearn, joblib, tensorflow"], cwd=ROOT, check=True)
     if not (FRONTEND / "node_modules/vite/bin/vite.js").is_file():
         raise RuntimeError("Frontend dependencies are missing. Run: python run.py --install")
     print(f"Project: {ROOT}\nPython: {PYTHON}\nNode: {node} ({version})", flush=True)
